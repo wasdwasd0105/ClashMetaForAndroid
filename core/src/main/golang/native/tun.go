@@ -37,6 +37,17 @@ func (t *remoteTun) markSocket(fd int) {
 	C.mark_socket(t.callback, C.int(fd))
 }
 
+func (t *remoteTun) bindSocket(fd int, tag string) {
+	_ = t.limit.Acquire(context.Background(), 1)
+	defer t.limit.Release(1)
+
+	if t.closed {
+		return
+	}
+
+	C.bind_socket(t.callback, C.int(fd), C.CString(tag))
+}
+
 func (t *remoteTun) querySocketUid(protocol int, source, target string) int {
 	_ = t.limit.Acquire(context.Background(), 1)
 	defer t.limit.Release(1)
@@ -58,7 +69,7 @@ func (t *remoteTun) close() {
 		_ = t.closer.Close()
 	}
 
-	app.ApplyTunContext(nil, nil)
+	app.ApplyTunContext(nil, nil, nil)
 
 	C.release_object(t.callback)
 }
@@ -81,7 +92,7 @@ func startTun(fd C.int, stack, gateway, portal, dns C.c_string, callback unsafe.
 
 	remote := &remoteTun{callback: callback, closed: false, limit: semaphore.NewWeighted(4)}
 
-	app.ApplyTunContext(remote.markSocket, remote.querySocketUid)
+	app.ApplyTunContext(remote.markSocket, remote.bindSocket, remote.querySocketUid)
 
 	closer, err := tun.Start(f, s, g, p, d)
 	if err != nil {

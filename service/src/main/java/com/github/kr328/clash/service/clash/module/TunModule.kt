@@ -62,6 +62,7 @@ class TunModule(private val vpn: VpnService) : Module<Unit>(vpn) {
             portal = device.portal,
             dns = device.dns,
             markSocket = vpn::protect,
+            bindSocket = { fd, tag -> NetworkPoolModule.instance?.bind(fd, tag) },
             querySocketUid = this::queryUid
         )
     }

@@ -8,10 +8,15 @@ import (
 )
 
 var markSocketImpl func(fd int)
+var bindSocketImpl func(fd int, tag string)
 var querySocketUidImpl func(protocol int, source, target string) int
 
 func MarkSocket(fd int) {
 	markSocketImpl(fd)
+}
+
+func BindSocket(fd int, tag string) {
+	bindSocketImpl(fd, tag)
 }
 
 func QuerySocketUid(source, target net.Addr) int {
@@ -33,9 +38,13 @@ func QuerySocketUid(source, target net.Addr) int {
 	return querySocketUidImpl(protocol, source.String(), target.String())
 }
 
-func ApplyTunContext(markSocket func(fd int), querySocketUid func(int, string, string) int) {
+func ApplyTunContext(markSocket func(fd int), bindSocket func(fd int, tag string), querySocketUid func(int, string, string) int) {
 	if markSocket == nil {
 		markSocket = func(fd int) {}
+	}
+
+	if bindSocket == nil {
+		bindSocket = func(int, string) {}
 	}
 
 	if querySocketUid == nil {
@@ -43,9 +52,10 @@ func ApplyTunContext(markSocket func(fd int), querySocketUid func(int, string, s
 	}
 
 	markSocketImpl = markSocket
+	bindSocketImpl = bindSocket
 	querySocketUidImpl = querySocketUid
 }
 
 func init() {
-	ApplyTunContext(nil, nil)
+	ApplyTunContext(nil, nil, nil)
 }

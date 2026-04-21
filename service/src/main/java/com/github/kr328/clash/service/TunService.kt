@@ -30,6 +30,7 @@ class TunService : VpnService(), CoroutineScope by CoroutineScope(Dispatchers.De
         val store = ServiceStore(self)
 
         val close = install(CloseModule(self))
+        install(NetworkPoolModule(self))   // holds wifi/cellular Network handles for rule-level binding
         val tun = install(TunModule(self))
         val config = install(ConfigurationModule(self))
         val network = install(NetworkObserveModule(self))

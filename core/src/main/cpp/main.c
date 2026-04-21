@@ -311,6 +311,7 @@ Java_com_github_kr328_clash_core_bridge_Bridge_nativeSubscribeLogcat(JNIEnv *env
 
 
 static jmethodID m_tun_interface_mark_socket;
+static jmethodID m_tun_interface_bind_socket;
 static jmethodID m_tun_interface_query_socket_uid;
 static jmethodID m_completable_complete;
 static jmethodID m_completable_complete_exceptionally;
@@ -332,6 +333,17 @@ static void call_tun_interface_mark_socket_impl(void *tun_interface, int fd) {
     (*env)->CallVoidMethod(env, (jobject) tun_interface,
                            (jmethodID) m_tun_interface_mark_socket,
                            (jint) fd);
+}
+
+static void call_tun_interface_bind_socket_impl(void *tun_interface, int fd, const char *tag) {
+    TRACE_METHOD();
+
+    ATTACH_JNI();
+
+    (*env)->CallVoidMethod(env, (jobject) tun_interface,
+                           (jmethodID) m_tun_interface_bind_socket,
+                           (jint) fd,
+                           (jstring) new_string(tag));
 }
 
 static int call_tun_interface_query_socket_uid_impl(void *tun_interface, int protocol,
@@ -480,6 +492,8 @@ JNI_OnLoad(JavaVM *vm, void *reserved) {
 
     m_tun_interface_mark_socket = find_method(c_tun_interface, "markSocket",
                                               "(I)V");
+    m_tun_interface_bind_socket = find_method(c_tun_interface, "bindSocket",
+                                              "(ILjava/lang/String;)V");
     m_tun_interface_query_socket_uid = find_method(c_tun_interface, "querySocketUid",
                                                    "(ILjava/lang/String;Ljava/lang/String;)I");
     m_completable_complete = find_method(c_completable, "complete",
@@ -508,6 +522,7 @@ JNI_OnLoad(JavaVM *vm, void *reserved) {
     o_unit = new_global(o_unit);
 
     mark_socket_func = &call_tun_interface_mark_socket_impl;
+    bind_socket_func = &call_tun_interface_bind_socket_impl;
     query_socket_uid_func = &call_tun_interface_query_socket_uid_impl;
     complete_func = &call_completable_complete_impl;
     fetch_report_func = &call_fetch_callback_report_impl;

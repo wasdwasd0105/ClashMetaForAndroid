@@ -3,6 +3,8 @@
 
 void (*mark_socket_func)(void *tun_interface, int fd);
 
+void (*bind_socket_func)(void *tun_interface, int fd, const char *tag);
+
 int (*query_socket_uid_func)(void *tun_interface, int protocol, const char *source, const char *target);
 
 void (*complete_func)(void *completable, const char *exception);
@@ -21,6 +23,14 @@ void mark_socket(void *interface, int fd) {
     TRACE_METHOD();
 
     mark_socket_func(interface, fd);
+}
+
+void bind_socket(void *interface, int fd, char *tag) {
+    TRACE_METHOD();
+
+    bind_socket_func(interface, fd, tag);
+
+    free(tag);
 }
 
 int query_socket_uid(void *interface, int protocol, char *source, char *target) {

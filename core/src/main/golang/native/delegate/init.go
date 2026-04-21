@@ -1,6 +1,7 @@
 package delegate
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/tunnel"
 )
 
 var errBlocked = errors.New("blocked")
@@ -47,13 +49,24 @@ func Init(home, versionName, gitVersion string, platformVersion int) {
 		return pkg, nil
 	}
 
-	dialer.DefaultSocketHook = func(network, address string, conn syscall.RawConn) error {
+	cellular := "cellular"
+	tunnel.DNSTransport.Store(&cellular)
+
+	dialer.DefaultSocketHookContext = func(ctx context.Context, network, address string, conn syscall.RawConn) error {
 		if platform.ShouldBlockConnection() {
 			return errBlocked
 		}
 
+		tag := dialer.TransportFromContext(ctx)
+		if tag != "" {
+			log.Infoln("[SocketHook] tag=%s network=%s address=%s", tag, network, address)
+		}
+
 		return conn.Control(func(fd uintptr) {
 			app.MarkSocket(int(fd))
+			if tag != "" {
+				app.BindSocket(int(fd), tag)
+			}
 		})
 	}
 }
