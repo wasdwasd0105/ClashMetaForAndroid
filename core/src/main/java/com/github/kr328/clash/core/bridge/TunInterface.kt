@@ -5,6 +5,6 @@ import androidx.annotation.Keep
 @Keep
 interface TunInterface {
     fun markSocket(fd: Int)
-    fun bindSocket(fd: Int, tag: String)
+    fun bindSocket(fd: Int, tag: String): Boolean
     fun querySocketUid(protocol: Int, source: String, target: String): Int
 }

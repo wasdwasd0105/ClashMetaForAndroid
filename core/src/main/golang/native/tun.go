@@ -37,15 +37,15 @@ func (t *remoteTun) markSocket(fd int) {
 	C.mark_socket(t.callback, C.int(fd))
 }
 
-func (t *remoteTun) bindSocket(fd int, tag string) {
+func (t *remoteTun) bindSocket(fd int, tag string) bool {
 	_ = t.limit.Acquire(context.Background(), 1)
 	defer t.limit.Release(1)
 
 	if t.closed {
-		return
+		return false
 	}
 
-	C.bind_socket(t.callback, C.int(fd), C.CString(tag))
+	return C.bind_socket(t.callback, C.int(fd), C.CString(tag)) != 0
 }
 
 func (t *remoteTun) querySocketUid(protocol int, source, target string) int {

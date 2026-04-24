@@ -335,15 +335,15 @@ static void call_tun_interface_mark_socket_impl(void *tun_interface, int fd) {
                            (jint) fd);
 }
 
-static void call_tun_interface_bind_socket_impl(void *tun_interface, int fd, const char *tag) {
+static int call_tun_interface_bind_socket_impl(void *tun_interface, int fd, const char *tag) {
     TRACE_METHOD();
 
     ATTACH_JNI();
 
-    (*env)->CallVoidMethod(env, (jobject) tun_interface,
-                           (jmethodID) m_tun_interface_bind_socket,
-                           (jint) fd,
-                           (jstring) new_string(tag));
+    return (*env)->CallBooleanMethod(env, (jobject) tun_interface,
+                                     (jmethodID) m_tun_interface_bind_socket,
+                                     (jint) fd,
+                                     (jstring) new_string(tag));
 }
 
 static int call_tun_interface_query_socket_uid_impl(void *tun_interface, int protocol,
@@ -491,9 +491,9 @@ JNI_OnLoad(JavaVM *vm, void *reserved) {
     jclass c_unit = find_class("kotlin/Unit");
 
     m_tun_interface_mark_socket = find_method(c_tun_interface, "markSocket",
-                                              "(I)V");
+                                               "(I)V");
     m_tun_interface_bind_socket = find_method(c_tun_interface, "bindSocket",
-                                              "(ILjava/lang/String;)V");
+                                               "(ILjava/lang/String;)Z");
     m_tun_interface_query_socket_uid = find_method(c_tun_interface, "querySocketUid",
                                                    "(ILjava/lang/String;Ljava/lang/String;)I");
     m_completable_complete = find_method(c_completable, "complete",

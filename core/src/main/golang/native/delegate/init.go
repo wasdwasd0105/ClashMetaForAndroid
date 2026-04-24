@@ -19,6 +19,7 @@ import (
 )
 
 var errBlocked = errors.New("blocked")
+var errTransportUnavailable = errors.New("transport unavailable")
 
 func Init(home, versionName, gitVersion string, platformVersion int) {
 	log.Infoln("Init core, home: %s, versionName: %s, gitVersion: %s, platformVersion: %d", home, versionName, gitVersion, platformVersion)
@@ -62,11 +63,19 @@ func Init(home, versionName, gitVersion string, platformVersion int) {
 			log.Infoln("[SocketHook] tag=%s network=%s address=%s", tag, network, address)
 		}
 
-		return conn.Control(func(fd uintptr) {
+		bound := false
+		err := conn.Control(func(fd uintptr) {
 			app.MarkSocket(int(fd))
 			if tag != "" {
-				app.BindSocket(int(fd), tag)
+				bound = app.BindSocket(int(fd), tag)
 			}
 		})
+		if err != nil {
+			return err
+		}
+		if dialer.TransportRequiresNetwork(tag) && !bound {
+			return errTransportUnavailable
+		}
+		return nil
 	}
 }

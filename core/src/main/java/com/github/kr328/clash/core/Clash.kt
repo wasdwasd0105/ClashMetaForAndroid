@@ -69,7 +69,7 @@ object Clash {
         portal: String,
         dns: String,
         markSocket: (Int) -> Boolean,
-        bindSocket: (Int, String) -> Unit,
+        bindSocket: (Int, String) -> Boolean,
         querySocketUid: (protocol: Int, source: InetSocketAddress, target: InetSocketAddress) -> Int
     ) {
         Bridge.nativeStartTun(fd, stack, gateway, portal, dns, object : TunInterface {
@@ -77,8 +77,8 @@ object Clash {
                 markSocket(fd)
             }
 
-            override fun bindSocket(fd: Int, tag: String) {
-                bindSocket(fd, tag)
+            override fun bindSocket(fd: Int, tag: String): Boolean {
+                return bindSocket(fd, tag)
             }
 
             override fun querySocketUid(protocol: Int, source: String, target: String): Int {

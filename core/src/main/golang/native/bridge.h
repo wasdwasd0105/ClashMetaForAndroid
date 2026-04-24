@@ -11,7 +11,7 @@ typedef const char *c_string;
 
 extern void (*mark_socket_func)(void *tun_interface, int fd);
 
-extern void (*bind_socket_func)(void *tun_interface, int fd, const char *tag);
+extern int (*bind_socket_func)(void *tun_interface, int fd, const char *tag);
 
 extern int (*query_socket_uid_func)(void *tun_interface, int protocol, const char *source, const char *target);
 
@@ -30,7 +30,7 @@ extern int (*open_content_func)(const char *url, char *error, int error_length);
 // cgo
 extern void mark_socket(void *interface, int fd);
 
-extern void bind_socket(void *interface, int fd, char *tag);
+extern int bind_socket(void *interface, int fd, char *tag);
 
 extern int query_socket_uid(void *interface, int protocol, char *source, char *target);
 

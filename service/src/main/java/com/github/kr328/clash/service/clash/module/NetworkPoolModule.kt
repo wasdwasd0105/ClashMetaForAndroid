@@ -34,7 +34,7 @@ class NetworkPoolModule(service: Service) : Module<Unit>(service) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return false
         val net = when (tag) {
             "wifi" -> wifi
-            "cellular" -> cellular
+            "cellular", "cellular-only" -> cellular
             else -> null
         }
         if (net == null) {
